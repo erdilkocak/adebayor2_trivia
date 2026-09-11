@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3-2-1 ADEBAYOR! — Football Transfer </title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pitch-night: #0B1F17;
+  --turf: #123526;
+  --turf-light: #1B4E36;
+  --line: #2C5F44;
+  --chalk: #F2F6F1;
+  --muted: #8FB39D;
+  --amber: #FFB627;
+  --amber-dim: #B98420;
+  --card-yellow: #FFD400;
+  --card-red: #E63946;
+  --p1: #4FC3F7;
+  --p2: #FF8A65;
+  --font-display: 'Anton', sans-serif;
+  --font-mono: 'Oswald', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+ min-height: 100vh;
+ margin:0;
+ padding: 0;
+ background-size: cover;
+ background-position: center;
+ background-repeat:no-repeat ;
+ background-attachment: fixed;
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+
+
+
+ color: var(--chalk);
+ font-family: var(--font-body);
+}
+
+body::before{
+  content:"";
+  position:fixed;
+   inset:0;
+  background: repeating-linear-gradient();
+  pointer-events:none;
+  z-index:-1;
+}
+
+.wrap{ width:100%; max-width: 860px; position:relative; z-index:1; }
+
+.title-block{ text-align:center; margin-bottom: 22px; }
+.title-block h1{
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  letter-spacing: 1px;
+  margin: 0;
+  color: var(--amber);
+  text-shadow: 0 0 18px rgba(255,182,39,0.45), 0 2px 0 #6b4a0f;
+  line-height:1;
+}
+.title-block .sub{
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.scoreboard{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  background: linear-gradient(180deg, var(--turf-light), var(--turf));
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 0 40px rgba(0,0,0,0.25);
+  margin-bottom: 22px;
+}
+.player-panel{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  transition: box-shadow .25s, background .25s;
+}
+.player-panel .p-name{
+  font-family: var(--font-mono);
+  font-weight:600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+}
+.player-panel.p1 .p-name{ color: var(--p1); }
+.player-panel.p2 .p-name{ color: var(--p2); }
+.p-score{
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--chalk);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+.p-fouls{ display:flex; gap:4px; height: 22px; align-items:center; }
+.card-icon{
+  width: 14px; height: 19px; border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.card-icon.yellow{ background: var(--card-yellow); }
+.card-icon.empty{ background: rgba(255,255,255,0.08); border:1px dashed rgba(255,255,255,0.25); }
+
+.vs-mid{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family: var(--font-display);
+  color: var(--muted);
+  gap: 4px;
+}
+.vs-mid .vs-text{ font-size: 1.3rem; color: var(--chalk); }
+.vs-mid .target{ font-family: var(--font-mono); font-size: 0.65rem; letter-spacing:1px; text-transform:uppercase; color: var(--muted); }
+
+.panel{
+  background: rgba(18,53,38,0.55);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px 24px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+.hidden{ display:none !important; }
+
+.setup-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+.field label{
+  display:block; font-family: var(--font-mono); font-size:0.75rem; letter-spacing:1px;
+  text-transform:uppercase; color: var(--muted); margin-bottom:6px;
+}
+.field input{
+  width:100%; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: rgba(0,0,0,0.25); color: var(--chalk);
+  font-family: var(--font-body); font-size: 1rem; outline:none;
+}
+.field input:focus{ border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,182,39,0.2); }
+.setup-options{ display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap; margin-bottom: 20px;}
+.setup-options .field{ flex:1; min-width: 140px; }
+
+.btn{
+  font-family: var(--font-mono); font-weight:600; letter-spacing:1px; text-transform:uppercase;
+  font-size: 0.95rem; padding: 14px 22px; border-radius: 10px; border: none; cursor:pointer;
+  transition: transform .12s, box-shadow .12s, background .2s;
+}
+.btn:active{ transform: translateY(1px); }
+.btn-primary{
+  background: linear-gradient(180deg, var(--amber), var(--amber-dim));
+  color: #1a1305;
+  box-shadow: 0 6px 0 #7a560f, 0 8px 16px rgba(0,0,0,0.4);
+  width:100%;
+}
+.btn-primary:hover{ filter: brightness(1.05); }
+.btn-secondary{
+  background: rgba(255,255,255,0.06); color: var(--chalk);
+  border: 1px solid var(--line);
+}
+
+.matchup{
+  display:grid; grid-template-columns: 1fr auto 1fr; align-items:center; gap: 14px;
+  margin-bottom: 18px;
+}
+.club-card{
+  text-align:center; padding: 18px 10px; border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
+  border: 1px solid var(--line);
+}
+.club-crest{
+  width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 10px;
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-display); font-size: 1.3rem; color: #0a0a0a;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 0 0 3px rgba(255,255,255,0.25);
+}
+.club-name{ font-family: var(--font-mono); font-weight:600; font-size: 0.95rem; }
+.club-league{ font-size: 0.7rem; color: var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:2px;}
+.matchup .vs-glyph{ font-family: var(--font-display); font-size: 1.6rem; color: var(--amber); }
+
+.prompt-text{
+  text-align:center; font-size: 1.15rem; margin: 6px 0 18px; color: var(--chalk);
+}
+.prompt-text b{ color: var(--amber); }
+
+.timer-track{
+  width:100%; height: 10px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow:hidden;
+  margin-bottom: 18px; border: 1px solid var(--line);
+}
+.timer-fill{
+  height: 100%; width:100%; background: linear-gradient(90deg, var(--amber), var(--card-yellow));
+  transform-origin: left; transition: width 0.1s linear, background 0.3s;
+}
+.timer-fill.danger{ background: linear-gradient(90deg, var(--card-red), #ff6b6b); }
+
+/* --- ÇİFT YAZMA ALANI CSS --- */
+.dual-answer-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.player-box label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+.p1-box label { color: var(--p1); }
+.p2-box label { color: var(--p2); }
+
+.player-box input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.3);
+  color: var(--chalk);
+  font-size: 1rem;
+  outline: none;
+}
+.player-box input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(255,182,39,0.2);
+}
+
+.feedback{
+  min-height: 60px; border-radius: 10px; padding: 12px 16px; margin-bottom: 14px;
+  font-family: var(--font-body); font-size: 0.95rem; line-height:1.5;
+  border: 1px solid transparent; transition: all .2s;
+}
+.feedback.correct{ background: rgba(40, 180, 99, 0.12); border-color: #2ecc71; color:#c9f7db; }
+.feedback.wrong{ background: rgba(230, 57, 70, 0.12); border-color: var(--card-red); color:#ffd7da; }
+.feedback.foul{ background: rgba(255, 212, 0, 0.10); border-color: var(--card-yellow); color:#fff3c4; }
+.feedback.info{ background: rgba(255,255,255,0.05); border-color: var(--line); color: var(--muted); }
+.feedback .answer-reveal{ font-family: var(--font-mono); font-weight:600; color: var(--amber); }
+
+.controls-row{ display:flex; gap:10px; justify-content:flex-end; }
+
+@keyframes shake-x{
+  10%,90%{ transform: translateX(-1px); }
+  20%,80%{ transform: translateX(2px); }
+  30%,50%,70%{ transform: translateX(-5px); }
+  40%,60%{ transform: translateX(5px); }
+}
+.player-box input.shake-wrong{
+  animation: shake-x 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  border-color: var(--card-red) !important;
+  background: rgba(230,57,70,0.18) !important;
+}
+.player-box.is-mine{ box-shadow: 0 0 0 2px var(--amber); border-radius: 12px; }
+.player-box input:disabled{ opacity: 0.45; cursor: not-allowed; }
+
+.countdown-overlay{
+  position:fixed; inset:0; background: rgba(5,10,8,0.92);
+  display:flex; align-items:center; justify-content:center;
+  z-index: 50; backdrop-filter: blur(2px);
+}
+.flip-card{
+  font-family: var(--font-display);
+  font-size: clamp(6rem, 22vw, 11rem);
+  color: var(--amber);
+  text-shadow: 0 0 40px rgba(255,182,39,0.6);
+}
+.flip-card.go{ color: var(--card-yellow); text-shadow: 0 0 50px rgba(255,212,0,0.7); }
+
+.gameover-title{
+  font-family: var(--font-display); font-size: clamp(1.8rem,5vw,2.6rem); text-align:center;
+  color: var(--amber); margin-bottom: 6px;
+}
+.gameover-sub{ text-align:center; color: var(--muted); margin-bottom: 22px; font-family: var(--font-mono); letter-spacing:1px; text-transform:uppercase;}
+
+footer{ margin-top: 30px; text-align:center; color: var(--muted); font-size: 0.75rem; }
+
+@media (max-width: 560px){
+  .setup-grid, .setup-options, .dual-answer-container{ grid-template-columns: 1fr; }
+  .scoreboard{ grid-template-columns: 1fr 1fr; }
+  .vs-mid{ grid-column: 1 / -1; order:-1; }
+  .matchup{ grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="title-block">
+    <h1>3-2-1 ADEBAYOR!</h1>
+    <div class="sub"></div>
+  </div>
+<!-- LOBİ GİRİŞ PANELİ -->
+<div id="lobby-screen" style="display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 60px auto; text-align: center; color: white;">
+  <h2 style="font-size: 24px; font-weight: bold;">3-2-1 ADEBAYOR!</h2>
+  <input type="text" id="playerName" placeholder="Adını Yaz" style="padding: 10px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff;" />
+  <input type="text" id="roomId" placeholder="Oda Kodu (örn: bjk1)" style="padding: 10px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff;" />
+  <div style="display:flex; gap:8px;">
+    <input type="number" id="lobby-target" value="5" min="1" max="20" title="Kazanma skoru" style="width:50%; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff;" />
+    <input type="number" id="lobby-timer" value="12" min="3" max="30" title="Round süresi (sn)" style="width:50%; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff;" />
+  </div>
+  <button id="btn-join-room" onclick="joinRoom()" style="padding: 12px; background: #22c55e; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+    Odaya Katıl
+  </button>
+  <p id="lobby-status" style="font-size: 14px; color: #aaa;"></p>
+</div>
+  <div class="scoreboard hidden" id="scoreboard">
+    <div class="player-panel p1" id="panel-p1">
+      <div class="p-name" id="name-p1-display">PLAYER 1</div>
+      <div class="p-score" id="score-p1">0</div>
+      <div class="p-fouls" id="fouls-p1"></div>
+    </div>
+    <div class="vs-mid">
+      <div class="vs-text">VS</div>
+      <div class="target" id="target-display">FIRST TO 5</div>
+    </div>
+    <div class="player-panel p2" id="panel-p2">
+      <div class="p-name" id="name-p2-display">PLAYER 2</div>
+      <div class="p-score" id="score-p2">0</div>
+      <div class="p-fouls" id="fouls-p2"></div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="panel hidden" id="game-screen">
+    <div class="matchup">
+      <div class="club-card">
+        <div class="club-crest" id="crest-a">?</div>
+        <div class="club-name" id="club-name-a">—</div>
+        <div class="club-league" id="club-league-a">—</div>
+      </div>
+      <div class="vs-glyph">×</div>
+      <div class="club-card">
+        <div class="club-crest" id="crest-b">?</div>
+        <div class="club-name" id="club-name-b">—</div>
+        <div class="club-league" id="club-league-b">—</div>
+      </div>
+    </div>
+
+    <div class="prompt-text">Name a player who played for <b id="prompt-a">CLUB A</b> AND <b id="prompt-b">CLUB B</b>.</div>
+
+    <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
+
+    <!-- İKİ OYUNCU İÇİN ÇİFT CEVAP KUTUSU -->
+    <div class="dual-answer-container">
+      <div class="player-box p1-box">
+        <label id="label-p1-box">PLAYER 1</label>
+        <input type="text" id="answer-p1" placeholder="Yaz ve Enter'a bas..." autocomplete="off">
+      </div>
+      <div class="player-box p2-box">
+        <label id="label-p2-box">PLAYER 2</label>
+        <input type="text" id="answer-p2" placeholder="Yaz ve Enter'a bas..." autocomplete="off">
+      </div>
+    </div>
+
+    <div class="feedback info hidden" id="feedback"></div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div class="panel hidden" id="gameover-screen">
+    <div class="gameover-title" id="gameover-title">WINNER!</div>
+    <div class="gameover-sub">Full time</div>
+    <button class="btn btn-primary" id="btn-restart">TEKRAR OYNA</button>
+  </div>
+</div>
+
+<div class="countdown-overlay hidden" id="countdown-overlay">
+  <div class="flip-card" id="countdown-number">3</div>
+</div>
+
+<script>
+/* ============================================================
+   3-2-1 ADEBAYOR! — Oyun tamamen WebSocket state'i üzerinden
+   yönetilir. Yerel/tek cihaz fetch tabanlı akış kaldırıldı.
+   ============================================================ */
+   
+
+const SERVER_HOST = "adebayor-trivia.onrender.com";
+
+const bgImages = [
+  'images/images1.jpg',
+  'images/images2.jpg',
+  'images/images3.jpg',
+  'images/images4.jpg',
+  'images/images5.jpg'
+];
+const randomBg = bgImages[Math.floor(Math.random() * bgImages.length)];
+document.body.style.backgroundImage =
+  'linear-gradient(rgba(10, 20, 15, 0.75), rgba(10, 20, 15, 0.88)), url("' + randomBg + '")';
+
+/* ---------------- STATE ---------------- */
+let socket = null;
+let myPlayerName = "";
+let myIndex = null; // 0 -> answer-p1 kutusu benim, 1 -> answer-p2 kutusu benim
+
+const state = {
+  targetScore: 5,
+  turnSeconds: 12,
+  names: ['Player 1', 'Player 2'],
+  scores: [0, 0],
+  timerHandle: null,
+  timeLeft: 0,
+  roundActive: false,
+};
+
+/* ---------------- DOM REFS ---------------- */
+const el = {
+  lobbyScreen: document.getElementById('lobby-screen'),
+  lobbyStatus: document.getElementById('lobby-status'),
+  btnJoin: document.getElementById('btn-join-room'),
+
+  scoreboard: document.getElementById('scoreboard'),
+  nameP1Display: document.getElementById('name-p1-display'),
+  nameP2Display: document.getElementById('name-p2-display'),
+  scoreP1: document.getElementById('score-p1'),
+  scoreP2: document.getElementById('score-p2'),
+  targetDisplay: document.getElementById('target-display'),
+
+  gameScreen: document.getElementById('game-screen'),
+  crestA: document.getElementById('crest-a'),
+  crestB: document.getElementById('crest-b'),
+  clubNameA: document.getElementById('club-name-a'),
+  clubNameB: document.getElementById('club-name-b'),
+  clubLeagueA: document.getElementById('club-league-a'),
+  clubLeagueB: document.getElementById('club-league-b'),
+  promptA: document.getElementById('prompt-a'),
+  promptB: document.getElementById('prompt-b'),
+  timerFill: document.getElementById('timer-fill'),
+
+  boxP1: document.querySelector('.p1-box'),
+  boxP2: document.querySelector('.p2-box'),
+  labelP1Box: document.getElementById('label-p1-box'),
+  labelP2Box: document.getElementById('label-p2-box'),
+  answerP1: document.getElementById('answer-p1'),
+  answerP2: document.getElementById('answer-p2'),
+
+  feedback: document.getElementById('feedback'),
+
+  gameoverScreen: document.getElementById('gameover-screen'),
+  gameoverTitle: document.getElementById('gameover-title'),
+  btnRestart: document.getElementById('btn-restart'),
+
+  countdownOverlay: document.getElementById('countdown-overlay'),
+  countdownNumber: document.getElementById('countdown-number'),
+};
+
+/* ---------------- YARDIMCI FONKSİYONLAR ---------------- */
+function sanitize(str) {
+  if (!str) return '';
+  return str
+    .replace(/İ/g, 'i').replace(/I/g, 'ı')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function initials(name) {
+  return (name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ---------------- EKRAN GEÇİŞLERİ ---------------- */
+function showLobby() {
+  el.lobbyScreen.style.display = 'flex';
+  el.gameScreen.classList.add('hidden');
+  el.gameoverScreen.classList.add('hidden');
+  el.scoreboard.classList.add('hidden');
+  stopTurnTimer();
+}
+
+function showGame() {
+  el.lobbyScreen.style.display = 'none';
+  el.gameoverScreen.classList.add('hidden');
+  el.gameScreen.classList.remove('hidden');
+  el.scoreboard.classList.remove('hidden');
+}
+
+function showGameOver(winnerName) {
+  stopTurnTimer();
+  el.gameScreen.classList.add('hidden');
+  el.gameoverScreen.classList.remove('hidden');
+  el.scoreboard.classList.remove('hidden');
+  el.gameoverTitle.textContent = `${(winnerName || '?').toUpperCase()} KAZANDI! 🏆`;
+}
+
+/* ---------------- SKOR / MATCHUP RENDER ---------------- */
+function renderScoreboard() {
+  el.nameP1Display.textContent = state.names[0];
+  el.nameP2Display.textContent = state.names[1];
+  el.labelP1Box.textContent = state.names[0].toUpperCase();
+  el.labelP2Box.textContent = state.names[1].toUpperCase();
+  el.scoreP1.textContent = state.scores[0];
+  el.scoreP2.textContent = state.scores[1];
+  el.targetDisplay.textContent = `FIRST TO ${state.targetScore}`;
+}
+
+function renderMatchup(clubA, clubB) {
+  el.crestA.textContent = initials(clubA.name);
+  el.crestA.style.background = clubA.color || '#123526';
+  el.crestB.textContent = initials(clubB.name);
+  el.crestB.style.background = clubB.color || '#1B4E36';
+
+  el.clubNameA.textContent = clubA.name;
+  el.clubNameB.textContent = clubB.name;
+  el.clubLeagueA.textContent = clubA.league || 'All-Time';
+  el.clubLeagueB.textContent = clubB.league || 'All-Time';
+
+  el.promptA.textContent = clubA.name;
+  el.promptB.textContent = clubB.name;
+}
+
+function setFeedback(type, html) {
+  el.feedback.className = 'feedback ' + type;
+  el.feedback.innerHTML = html;
+  el.feedback.classList.remove('hidden');
+}
+
+function clearFeedback() {
+  el.feedback.classList.add('hidden');
+  el.feedback.innerHTML = '';
+}
+
+/* ---------------- KİMLİĞE GÖRE INPUT KİLİTLEME ----------------
+   Her oyuncunun ekranında SADECE kendi kutusu aktif olur.       */
+function applyIdentityLock() {
+  const iAmP1 = myIndex === 0;
+
+  el.boxP1.classList.toggle('is-mine', iAmP1);
+  el.boxP2.classList.toggle('is-mine', !iAmP1);
+
+  el.answerP1.disabled = !iAmP1;
+  el.answerP2.disabled = iAmP1;
+
+  el.answerP1.value = '';
+  el.answerP2.value = '';
+
+  if (iAmP1) el.answerP1.focus();
+  else el.answerP2.focus();
+}
+
+function myInput() {
+  return myIndex === 0 ? el.answerP1 : el.answerP2;
+}
+
+/* ---------------- SAYAÇ (görsel baskı çubuğu) ---------------- */
+function startTurnTimer() {
+  stopTurnTimer();
+  state.timeLeft = state.turnSeconds * 1000;
+  const totalMs = state.timeLeft;
+
+  el.timerFill.style.width = '100%';
+  el.timerFill.classList.remove('danger');
+
+  const tickMs = 100;
+  state.timerHandle = setInterval(() => {
+    state.timeLeft -= tickMs;
+    if (state.timeLeft <= 0) {
+      // Round sunucu tarafından sonlandırılana kadar çubuğu sıfırlayıp devam ettir
+      state.timeLeft = totalMs;
+    }
+    const pct = Math.max(0, (state.timeLeft / totalMs) * 100);
+    el.timerFill.style.width = pct + '%';
+    el.timerFill.classList.toggle('danger', pct < 30);
+  }, tickMs);
+}
+
+function stopTurnTimer() {
+  clearInterval(state.timerHandle);
+  state.timerHandle = null;
+}
+
+/* ---------------- 3-2-1 GO! ---------------- */
+function playCountdown(callback) {
+  el.countdownOverlay.classList.remove('hidden');
+  const sequence = ['3', '2', '1', 'GO!'];
+  let i = 0;
+
+  function step() {
+    el.countdownNumber.textContent = sequence[i];
+    el.countdownNumber.className = 'flip-card' + (sequence[i] === 'GO!' ? ' go' : '');
+    i++;
+    if (i < sequence.length) {
+      setTimeout(step, 500);
+    } else {
+      setTimeout(() => {
+        el.countdownOverlay.classList.add('hidden');
+        callback();
+      }, 350);
+    }
+  }
+  step();
+}
+
+/* ---------------- YANLIŞ CEVAP EFEKTİ ---------------- */
+function flashWrong() {
+  const input = myInput();
+  if (!input) return;
+
+  setFeedback('wrong', '❌ Yanlış cevap, tekrar dene!');
+
+  input.classList.remove('shake-wrong');
+  // reflow ile animasyonu yeniden tetikle
+  void input.offsetWidth;
+  input.classList.add('shake-wrong');
+  input.value = '';
+  input.focus();
+
+  clearTimeout(flashWrong._t);
+  flashWrong._t = setTimeout(() => {
+    input.classList.remove('shake-wrong');
+  }, 550);
+}
+
+/* ---------------- ODAYA KATILMA ---------------- */
+function joinRoom() {
+  const name = document.getElementById("playerName").value.trim();
+  const room = document.getElementById("roomId").value.trim();
+  const target = Math.max(1, parseInt(document.getElementById("lobby-target").value, 10) || 5);
+  const timer = Math.max(3, parseInt(document.getElementById("lobby-timer").value, 10) || 12);
+
+  if (!name || !room) {
+    el.lobbyStatus.textContent = "Lütfen isim ve oda kodu girin!";
+    return;
+  }
+
+  myPlayerName = name;
+  state.targetScore = target;
+  state.turnSeconds = timer;
+
+  el.btnJoin.disabled = true;
+  el.lobbyStatus.textContent = "Sunucuya bağlanılıyor...";
+
+  const url = `wss://${SERVER_HOST}/ws/${encodeURIComponent(room)}/${encodeURIComponent(name)}?target=${target}&timer=${timer}`;
+
+  try {
+    socket = new WebSocket(url);
+  } catch (err) {
+    el.lobbyStatus.textContent = "Bağlantı kurulamadı, tekrar deneyin.";
+    el.btnJoin.disabled = false;
+    return;
+  }
+
+  socket.onopen = () => {
+    el.lobbyStatus.textContent = "Bağlandı! Rakip bekleniyor...";
+  };
+
+  socket.onclose = () => {
+    if (el.lobbyScreen.style.display !== 'none') {
+      el.lobbyStatus.textContent = "Bağlantı kapandı. Tekrar deneyin.";
+      el.btnJoin.disabled = false;
+    }
+  };
+
+  socket.onerror = () => {
+    el.lobbyStatus.textContent = "Bağlantı hatası oluştu.";
+  };
+
+  socket.onmessage = handleServerMessage;
+}
+
+/* ---------------- SUNUCUDAN GELEN MESAJLAR ---------------- */
+function handleServerMessage(event) {
+  let data;
+  try {
+    data = JSON.parse(event.data);
+  } catch (e) {
+    return;
+  }
+
+  switch (data.type) {
+    case "ROOM_STATUS": {
+      const count = (data.players || []).length;
+      el.lobbyStatus.textContent = count < 2
+        ? `Odada ${count}/2 oyuncu var, rakip bekleniyor...`
+        : "Oda dolu, oyun başlıyor...";
+      break;
+    }
+
+    case "ROUND_START": {
+      const playerNames = Object.keys(data.scores || {});
+      state.names[0] = playerNames[0] || 'Player 1';
+      state.names[1] = playerNames[1] || 'Player 2';
+      state.scores[0] = data.scores[state.names[0]] || 0;
+      state.scores[1] = data.scores[state.names[1]] || 0;
+      myIndex = (myPlayerName === state.names[0]) ? 0 : 1;
+
+      showGame();
+      renderScoreboard();
+      renderMatchup(data.clubA, data.clubB);
+      clearFeedback();
+      applyIdentityLock();
+      state.roundActive = true;
+
+      playCountdown(() => {
+        myInput().focus();
+        startTurnTimer();
+      });
+      break;
+    }
+
+    case "ROUND_WIN": {
+      state.roundActive = false;
+      stopTurnTimer();
+      const playerNames = Object.keys(data.scores || {});
+      const n0 = playerNames[0] || state.names[0];
+      const n1 = playerNames[1] || state.names[1];
+      state.names[0] = n0;
+      state.names[1] = n1;
+      state.scores[0] = data.scores[n0] || 0;
+      state.scores[1] = data.scores[n1] || 0;
+      renderScoreboard();
+
+      const shown = (data.common_players || []).slice(0, 6).map(escapeHtml).join(', ');
+      const winnerIsMe = data.winner === myPlayerName;
+      setFeedback('correct',
+        `✅ <b>${escapeHtml(data.winner)}</b> bildi! Kabul edilen cevaplar: <span class="answer-reveal">${shown}</span>`
+      );
+      if (winnerIsMe) {
+        el.answerP1.classList.remove('shake-wrong');
+        el.answerP2.classList.remove('shake-wrong');
+      }
+
+      el.answerP1.disabled = true;
+      el.answerP2.disabled = true;
+      break;
+    }
+
+    case "WRONG_ANSWER": {
+      flashWrong();
+      break;
+    }
+
+    case "GAME_OVER": {
+      state.roundActive = false;
+      showGameOver(data.winner);
+      break;
+    }
+
+    case "PLAYER_LEFT": {
+      setFeedback('foul', `⚠️ ${escapeHtml(data.player)} oyundan ayrıldı.`);
+      el.answerP1.disabled = true;
+      el.answerP2.disabled = true;
+      stopTurnTimer();
+      break;
+    }
+
+    case "ERROR": {
+      el.lobbyStatus.textContent = data.msg || "Bir hata oluştu.";
+      el.btnJoin.disabled = false;
+      break;
+    }
+
+    default:
+      break;
+  }
+}
+
+/* ---------------- CEVAP GÖNDERME (ENTER) ---------------- */
+function submitAnswer(rawAnswer) {
+  if (!state.roundActive) return;
+  if (!rawAnswer || !rawAnswer.trim()) return;
+  if (!socket || socket.readyState !== WebSocket.OPEN) return;
+
+  const clean = sanitize(rawAnswer);
+  if (!clean) return;
+
+  socket.send(JSON.stringify({ type: "SUBMIT_ANSWER", guess: clean }));
+}
+
+el.answerP1.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && myIndex === 0) {
+    submitAnswer(el.answerP1.value);
+    el.answerP1.value = '';
+  }
+});
+
+el.answerP2.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && myIndex === 1) {
+    submitAnswer(el.answerP2.value);
+    el.answerP2.value = '';
+  }
+});
+
+/* ---------------- YENİDEN OYNA ---------------- */
+el.btnRestart.addEventListener('click', () => {
+  if (socket) {
+    socket.onclose = null;
+    socket.close();
+    socket = null;
+  }
+  myPlayerName = '';
+  myIndex = null;
+  state.scores = [0, 0];
+  el.btnJoin.disabled = false;
+  el.lobbyStatus.textContent = '';
+  showLobby();
+});
+
+/* ---------------- BAŞLANGIÇ ---------------- */
+showLobby();
+</script>
+</body>
+</html>
