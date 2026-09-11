@@ -23,14 +23,57 @@ MAX_MATCH_ATTEMPTS = 500  # sonsuz döngüye karşı güvenlik siniri
 # ---------------------------------------------------------------------------
 # Yardımcı fonksiyonlar
 # ---------------------------------------------------------------------------
+import re
+
 def sanitize(text: str) -> str:
-    """Türkçe karakterleri ve büyük/küçük harf farklarını normalize eder."""
+    """Aksanları kaldırır, Türkçe i/ı harflerini normalize eder ve sadece harf/rakam bırakır."""
     if not text:
         return ""
+    # Parantez içlerini temizle: örn. Trezeguet (Mahmoud Hassan) -> Trezeguet
+    text = re.sub(r'\(.*?\)', '', text)
     text = text.replace("İ", "i").replace("I", "ı").lower()
     nfkd = unicodedata.normalize("NFKD", text)
     only_ascii = "".join(c for c in nfkd if not unicodedata.combining(c))
-    return only_ascii.strip()
+    # Noktalama işaretlerini boşluğa çevir
+    clean = re.sub(r'[^a-z0-9\s]', ' ', only_ascii)
+    return " ".join(clean.split()).strip()
+
+
+def is_answer_match(guess: str, full_player_name: str) -> bool:
+    """
+    Kullanıcının tahminini oyuncunun tam adı ve parçalarıyla esnek eşleştirir.
+    Örn:
+      - 'fabregas' -> 'Cesc Fabregas' (EŞLEŞİR)
+      - 'cesc fabregas' -> 'Cesc Fabregas' (EŞLEŞİR)
+      - 'van persie' -> 'Robin van Persie' (EŞLEŞİR)
+      - 'icardi' -> 'Mauro Icardi' (EŞLEŞİR)
+    """
+    s_guess = sanitize(guess)
+    s_full = sanitize(full_player_name)
+
+    if not s_guess or not s_full:
+        return False
+
+    # 1. Tam birebir eşleşme
+    if s_guess == s_full:
+        return True
+
+    # Oyuncunun isim parçaları (örn: ['cesc', 'fabregas'])
+    tokens = s_full.split()
+
+    # 2. Soyadı veya adı tek başına girildiyse (örn: 'fabregas' veya 'icardi')
+    # Tek harflik kısaltmaları veya çok kısa bağlaçları (de, da, van hariç) eleyebilirsin
+    if s_guess in tokens:
+        return True
+
+    # 3. Bileşik soyadlar için (örn: 'van persie' -> 'robin van persie')
+    if len(s_guess) >= 3 and s_guess in s_full:
+        # Kelime sınırında mı kontrolü (başka bir ismin içine yanlış kaynamasın)
+        pattern = r'\b' + re.escape(s_guess) + r'\b'
+        if re.search(pattern, s_full):
+            return True
+
+    return False
 
 
 _db_cache = None
@@ -265,10 +308,10 @@ async def game_socket(websocket: WebSocket, room_id: str, player_name: str):
                 guess = sanitize(data.get("guess", ""))
                 if not guess:
                     continue
+# Tahmin herhangi bir ortak oyuncuyla eşleşiyor mu?
+                is_correct = any(is_answer_match(guess, p) for p in match["common_players"])
 
-                common_sanitized = {sanitize(p) for p in match["common_players"]}
-
-                if guess in common_sanitized:
+                if is_correct:
                     room["scores"][player_name] = room["scores"].get(player_name, 0) + 1
                     winner = player_name
 
