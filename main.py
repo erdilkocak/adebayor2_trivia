@@ -4,6 +4,10 @@ import json
 import random
 import unicodedata
 from typing import Dict, Optional
+import asyncio
+import os
+import re
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -189,7 +193,45 @@ def get_match():
         "clubA": match["clubA"],
         "clubB": match["clubB"],
         "answers": match["common_players"],
+        
     }
+
+# ---------------------------------------------------------------------------
+# Öneri Sistemi (Sadece suggestions.json dosyasına kaydeder)
+# ---------------------------------------------------------------------------
+class PlayerSuggestion(BaseModel):
+    player_name: str
+    club_hint: str = ""
+
+SUGGESTIONS_FILE = "suggestions.json"
+
+@app.post("/api/suggest-player")
+def save_suggestion(data: PlayerSuggestion):
+    name = data.player_name.strip()
+    if not name or len(name) < 2:
+        return {"success": False, "msg": "Lütfen geçerli bir isim yazın."}
+
+    suggestions = []
+    if os.path.exists(SUGGESTIONS_FILE):
+        try:
+            with open(SUGGESTIONS_FILE, "r", encoding="utf-8") as f:
+                suggestions = json.load(f)
+        except Exception:
+            suggestions = []
+
+    # Aynı isim zaten varsa tekrar ekleme
+    if any(s.get("player_name", "").lower() == name.lower() for s in suggestions):
+        return {"success": False, "msg": "Bu isim zaten öneri havuzunda var."}
+
+    suggestions.append({
+        "player_name": name,
+        "club_hint": data.club_hint.strip()
+    })
+
+    with open(SUGGESTIONS_FILE, "w", encoding="utf-8") as f:
+        json.dump(suggestions, f, ensure_ascii=False, indent=2)
+
+    return {"success": True, "msg": "Önerin kaydedildi, teşekkürler!"}
 
 
 # ---------------------------------------------------------------------------
@@ -206,6 +248,7 @@ def new_room(target_score: int = 5, turn_seconds: int = 12) -> dict:
         "current_match": None,
         "target_score": target_score,
         "turn_seconds": turn_seconds,
+        "timer_task":None,
     }
 
 
@@ -220,9 +263,39 @@ async def broadcast(room: dict, payload: dict):
     for name in dead:
         room["players"].pop(name, None)
 
+async def round_timer_countdown(room_id: str, room: dict):
+    """Belirlenen saniye kadar bekler; süre biterse kimse puan almadan roundu bitirir."""
+    try:
+        await asyncio.sleep(room["turn_seconds"])
+
+        match = room.get("current_match")
+        if not match:
+            return
+
+        # Süre doldu: Skorlar değişmez, doğru cevaplar herkese gösterilir
+        await broadcast(room, {
+            "type": "ROUND_TIMEOUT",
+            "scores": room["scores"],
+            "common_players": match["common_players"],
+        })
+
+        # Cevapları okumaları için 3.5 saniye bekle, sonra yeni round başlat
+        await asyncio.sleep(3.5)
+
+        # Oyun hala devam ediyorsa bir sonraki tura geç
+        if room_id in rooms and len(room["players"]) >= 2:
+            await start_new_round(room_id, room)
+
+    except asyncio.CancelledError:
+        # Biri doğru bildiğinde bu sayaç iptal edilir
+        pass
+
 
 async def start_new_round(room_id: str, room: dict):
-    # Bir önceki eşleşmenin ID'lerini alarak aynı eşleşmenin tekrar gelmesini engelle
+    # Varsa eski sayacı iptal et
+    if room.get("timer_task") and not room["timer_task"].done():
+        room["timer_task"].cancel()
+
     prev_ids = None
     if room.get("current_match"):
         prev_ids = (
@@ -245,6 +318,9 @@ async def start_new_round(room_id: str, room: dict):
         "clubB": match["clubB"],
         "scores": room["scores"],
     })
+
+    # Yeni round süresini başlat
+    room["timer_task"] = asyncio.create_task(round_timer_countdown(room_id, room))
 
 
 @app.websocket("/ws/{room_id}/{player_name}")
@@ -312,6 +388,8 @@ async def game_socket(websocket: WebSocket, room_id: str, player_name: str):
                 is_correct = any(is_answer_match(guess, p) for p in match["common_players"])
 
                 if is_correct:
+                    if room.get("timer_task") and not room["timer_task"].done():
+                        room["timer_task"].cancel()
                     room["scores"][player_name] = room["scores"].get(player_name, 0) + 1
                     winner = player_name
 

@@ -19,7 +19,7 @@
       "İbrahim Üzülmez", "İbrahim Toraman", "Ersan Gülüm", "Allan McGregor", "Dany Nounkeu", "Joleon Lescott",
       "Pedro Franco", "Ramon Motta", "Kerim Frei", "Mustafa Pektemek", "Cenk Gönen", "Günay Güvenç",
       "Mert Günok", "Salih Uçan", "Tayfur Bingöl", "Umut Meraş", "Emrecan Uzunhan", "Onur Bulut",
-      "Tayyip Talha Sanuç", "Jackson Muleka", "Jean Onana", "Bakhtiyar Zaynutdinov", "Milot Rashica", "Joe Worrall"
+      "Tayyip Talha Sanuç", "Jackson Muleka", "Jean Onana", "Bakhtiyar Zaynutdinov", "Milot Rashica", "Joe Worrall","Leandro Trossard","Dušan Vlahović"
     ]
   },
   {
@@ -42,14 +42,14 @@
       "Tolgay Arslan", "Miha Zajc", "Altay Bayındır", "Vedat Muriqi", "Luiz Gustavo", "Enner Valencia",
       "Jose Sosa", "Dimitrios Pelkas", "Attila Szalai", "Kim Min-jae", "Miguel Crespo", "Michy Batshuayi",
       "Alexander Djiku", "Sebastian Szymanski", "Fred", "Cengiz Ünder", "Dominik Livakovic", "Allan Saint-Maximin",
-      "Youssef En-Nesyri", "Sofyan Amrabat"
+      "Youssef En-Nesyri", "Sofyan Amrabat","Romelu Lukaku","Mason Greenwood","Nathan Ake"
     ]
   },
   {
     "club_id": "GAL",
     "club_name": "Galatasaray",
     "players": [
-      "Wesley Sneijder", "Didier Drogba", "Mauro Icardi", "Burak Yılmaz", "Selçuk İnan", "Umut Bulut",
+      "Wesley Sneijder", "Didier Drogba", "Mauro İcardi", "Burak Yılmaz", "Selçuk İnan", "Umut Bulut",
       "Lukas Podolski", "Hakan Balta", "Sabri Sarıoğlu", "Fernando Muslera", "Arda Turan", "Bruma",
       "Mbaye Diagne", "Younes Belhanda", "Sofiane Feghouli", "Ryan Donk", "Eren Derdiyok", "Servet Çetin",
       "Semih Kaya", "Kerem Aktürkoğlu", "Dries Mertens", "Angeliño", "Marcão", "Barış Alper Yılmaz",
@@ -65,7 +65,7 @@
       "Badou Ndiaye", "Henry Onyekuru", "Emre Akbaba", "Christian Luyindama", "Marcao", "Radamel Falcao",
       "Florin Andone", "Mario Lemina", "Steven Nzonzi", "Emre Mor", "Mostafa Mohamed", "Victor Nelsson",
       "Sacha Boey", "Alexandru Cicaldau", "Olimpiu Morutan", "Lucas Torreira", "Sergio Oliveira", "Nicolo Zaniolo",
-      "Wilfried Zaha", "Hakim Ziyech", "Davinson Sanchez", "Tanguy Ndombele", "Gabriel Sara"
+      "Wilfried Zaha", "Hakim Ziyech", "Davinson Sanchez", "Tanguy Ndombele", "Gabriel Sara","George Hagi"
     ]
   },
   {
@@ -110,7 +110,7 @@
       "Kiko Casilla", "Mateo Kovacic", "Marco Asensio", "Mariano Diaz", "Theo Hernandez", "Dani Ceballos",
       "Marcos Llorente", "Borja Mayoral", "Alvaro Odriozola", "Brahim Diaz", "Eder Militao", "Ferland Mendy",
       "Luka Jovic", "Eden Hazard", "Eduardo Camavinga", "Antonio Rüdiger", "Aurelien Tchouameni", "Joselu",
-      "Arda Güler", "Kylian Mbappé", "Endrick"
+      "Arda Güler", "Kylian Mbappé", "Endrick","George Hagi"
     ]
   },
   {
@@ -134,7 +134,7 @@
       "Jean-Clair Todibo", "Junior Firpo", "Martin Braithwaite", "Pedri", "Francisco Trincao", "Miralem Pjanic",
       "Sergino Dest", "Eric Garcia", "Ferran Torres", "Adama Traore", "Luuk de Jong", "Andreas Christensen",
       "Franck Kessie", "Jules Kounde", "Marcos Alonso", "Hector Bellerin", "Ilkay Gündogan", "Inigo Martinez",
-      "Joao Cancelo", "Joao Felix", "Lamine Yamal", "Gavi", "Fermin Lopez", "Dani Olmo"
+      "Joao Cancelo", "Joao Felix", "Lamine Yamal", "Gavi", "Fermin Lopez", "Dani Olmo","George Hagi","Giovani dos Santos"
     ]
   },
 {
@@ -183,7 +183,7 @@
       "Mateo Kovacic", "Hakim Ziyech", "Timo Werner", "Ben Chilwell", "Thiago Silva", "Edouard Mendy",
       "Marc Cucurella", "Wesley Fofana", "Kalidou Koulibaly", "Mykhailo Mudryk", "Benoit Badiashile",
       "Noni Madueke", "Malo Gusto", "Moises Caicedo", "Cole Palmer", "Nicolas Jackson", "Axel Disasi",
-      "Robert Sanchez", "Romeo Lavia", "Christopher Nkunku", "Pedro Neto", "Joao Felix", "Jadon Sancho","Fikayo Tomori"
+      "Robert Sanchez", "Romeo Lavia", "Christopher Nkunku", "Pedro Neto", "Joao Felix", "Jadon Sancho","Fikayo Tomori","Nathan Ake"
     ]
   },
   {
@@ -289,7 +289,7 @@
     "players": [
       "Zlatan Ibrahimović", "Ángel Di María", "Neymar", "Lionel Messi", "David Beckham", "David Luiz",
       "Sergio Ramos", "Keylor Navas", "Achraf Hakimi", "Renato Sanches", "Danilo Pereira", "Gianluigi Donnarumma",
-      "Marco Verratti", "Marquinhos", "Thiago Silva", "Mauro Icardi", "Layvin Kurzawa", "Presnel Kimpembe",
+      "Marco Verratti", "Marquinhos", "Thiago Silva", "Mauro İcardi", "Layvin Kurzawa", "Presnel Kimpembe",
       "Kylian Mbappé", "Ousmane Dembélé", "Vitinha", "Warren Zaïre-Emery", "Nuno Mendes", "Gonçalo Ramos",
       "Randal Kolo Muani", "Manuel Ugarte", "Pauleta", "Mario Yepes", "Jerome Rothen", "Sylvain Armand",
       "Mikel Arteta", "Gabriel Heinze", "Ronaldinho", "Juan Pablo Sorin", "Edouard Cisse", "Bernard Mendy",
@@ -313,7 +313,7 @@
     "club_name": "Inter Milan",
     "players": [
       "Wesley Sneijder", "Zlatan Ibrahimović", "Samuel Eto'o", "Ricardo Quaresma", "Gary Medel",
-      "Emre Belözoğlu", "Mauro Icardi", "Arturo Vidal", "Alexis Sánchez", "Henrikh Mkhitaryan",
+      "Emre Belözoğlu", "Mauro İcardi", "Arturo Vidal", "Alexis Sánchez", "Henrikh Mkhitaryan",
       "Romelu Lukaku", "Achraf Hakimi", "Hakan Çalhanoğlu", "Edin Džeko", "Diego Milito", "Esteban Cambiasso",
       "Javier Zanetti", "Julio César", "Lautaro Martínez", "Nicolò Barella", "Marcelo Brozović",
       "Federico Dimarco", "Denzel Dumfries", "Christian Vieri", "Alvaro Recoba", "Ivan Cordoba",

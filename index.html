@@ -406,6 +406,84 @@ footer{ margin-top: 30px; text-align:center; color: var(--muted); font-size: 0.7
   .vs-mid{ grid-column: 1 / -1; order:-1; }
   .matchup{ grid-template-columns: 1fr; }
 }
+
+/* --- ÖNERİ PANELİ --- */
+.suggest-box {
+  margin-top: 16px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  text-align: center;
+  width: 100%;
+}
+
+.suggest-box h4 {
+  margin: 0 0 10px 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: var(--amber);
+}
+
+.suggest-inputs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.suggest-inputs input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #181818;
+  color: var(--chalk);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.suggest-inputs input:focus {
+  border-color: var(--amber);
+}
+
+.btn-suggest {
+  width: 100%;
+  padding: 10px;
+  background: var(--amber);
+  color: #121212;
+  font-family: var(--font-mono);
+  font-weight: bold;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.btn-suggest:hover {
+  filter: brightness(1.1);
+}
+
+#suggest-status {
+  font-size: 0.75rem;
+  margin: 8px 0 0 0;
+  min-height: 14px;
+}
+
+/* Mobilde dikey hizalama ve büyük dokunma alanı */
+body.mobile-mode .suggest-inputs {
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+@media (max-width: 560px) {
+  .suggest-inputs {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -435,6 +513,16 @@ footer{ margin-top: 30px; text-align:center; color: var(--muted); font-size: 0.7
     Odaya Katıl
   </button>
   <p id="lobby-status" style="font-size: 14px; color: #aaa;"></p>
+  <!-- EKSİK OYUNCU ÖNERİ PANELİ -->
+  <div class="suggest-box">
+    <h4>⚽ EKSİK OYUNCU BİLDİR</h4>
+    <div class="suggest-inputs">
+      <input type="text" id="suggest-name" placeholder="Oyuncu Adı (örn: Quaresma)" autocomplete="off" />
+      <input type="text" id="suggest-club" placeholder="Takım (isteğe bağlı)" autocomplete="off" />
+    </div>
+    <button type="button" class="btn-suggest" onclick="sendSuggestion()">ÖNERİYİ GÖNDER</button>
+    <p id="suggest-status"></p>
+  </div>
 </div>
   <div class="scoreboard hidden" id="scoreboard">
     <div class="player-panel p1" id="panel-p1">
@@ -713,15 +801,13 @@ function startTurnTimer() {
   state.timerHandle = setInterval(() => {
     state.timeLeft -= tickMs;
     if (state.timeLeft <= 0) {
-      // Round sunucu tarafından sonlandırılana kadar çubuğu sıfırlayıp devam ettir
-      state.timeLeft = totalMs;
+      state.timeLeft = 0;
     }
     const pct = Math.max(0, (state.timeLeft / totalMs) * 100);
     el.timerFill.style.width = pct + '%';
     el.timerFill.classList.toggle('danger', pct < 30);
   }, tickMs);
 }
-
 function stopTurnTimer() {
   clearInterval(state.timerHandle);
   state.timerHandle = null;
@@ -814,6 +900,7 @@ function joinRoom() {
   };
 
   socket.onmessage = handleServerMessage;
+  
 }
 
 /* ---------------- SUNUCUDAN GELEN MESAJLAR ---------------- */
@@ -824,6 +911,7 @@ function handleServerMessage(event) {
   } catch (e) {
     return;
   }
+
 
   switch (data.type) {
     case "ROOM_STATUS": {
@@ -855,6 +943,24 @@ function handleServerMessage(event) {
       });
       break;
     }
+    case "ROUND_TIMEOUT": {
+      state.roundActive = false;
+      stopTurnTimer();
+
+      // Skorlar değişmeden kalır
+      renderScoreboard();
+
+      // Olası doğru cevapları göster
+      const shown = (data.common_players || []).slice(0, 6).map(escapeHtml).join(', ');
+      setFeedback('foul',
+        `⏰ <b>Süre doldu!</b> Kimse bilemedi. Ortak oyuncular: <span class="answer-reveal">${shown}</span>`
+      );
+
+      // Inputları geçici olarak kilitle
+      el.answerP1.disabled = true;
+      el.answerP2.disabled = true;
+      break;
+    }
 
     case "ROUND_WIN": {
       state.roundActive = false;
@@ -867,6 +973,7 @@ function handleServerMessage(event) {
       state.scores[0] = data.scores[n0] || 0;
       state.scores[1] = data.scores[n1] || 0;
       renderScoreboard();
+      
 
       const shown = (data.common_players || []).slice(0, 6).map(escapeHtml).join(', ');
       const winnerIsMe = data.winner === myPlayerName;
@@ -956,6 +1063,45 @@ el.btnRestart.addEventListener('click', () => {
 
 /* ---------------- BAŞLANGIÇ ---------------- */
 showLobby();
+/* ---------------- OYUNCU ÖNERİ İŞLEMİ ---------------- */
+async function sendSuggestion() {
+  const nameInput = document.getElementById("suggest-name");
+  const clubInput = document.getElementById("suggest-club");
+  const statusEl = document.getElementById("suggest-status");
+
+  const playerName = nameInput.value.trim();
+  const clubHint = clubInput.value.trim();
+
+  if (!playerName) {
+    statusEl.textContent = "Lütfen bir oyuncu adı yazın!";
+    statusEl.style.color = "var(--card-red)";
+    return;
+  }
+
+  statusEl.textContent = "Kaydediliyor...";
+  statusEl.style.color = "var(--muted)";
+
+  try {
+    const res = await fetch(`https://${SERVER_HOST}/api/suggest-player`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ player_name: playerName, club_hint: clubHint })
+    });
+    const data = await res.json();
+
+    statusEl.textContent = data.msg;
+    if (data.success) {
+      statusEl.style.color = "#2ecc71";
+      nameInput.value = "";
+      clubInput.value = "";
+    } else {
+      statusEl.style.color = "var(--card-yellow)";
+    }
+  } catch (err) {
+    statusEl.textContent = "Sunucuya bağlanırken hata oluştu.";
+    statusEl.style.color = "var(--card-red)";
+  }
+}
 </script>
 </body>
 </html>
