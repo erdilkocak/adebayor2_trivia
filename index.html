@@ -23,6 +23,123 @@
   --font-display: 'Anton', sans-serif;
   --font-mono: 'Oswald', sans-serif;
   --font-body: 'Inter', sans-serif;
+  /* --- MOBİL MOD GEÇİŞ BUTONU --- */
+.mode-toggle-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--line);
+  color: var(--chalk);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s, transform 0.1s;
+}
+.mode-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobilde dokunmatik gönderim butonu */
+.mobile-submit-btn {
+  display: none;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--amber);
+  color: #121212;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   MOBİL ÖZEL GÖRÜNÜM SINIFI (body.mobile-mode veya <560px)
+   ============================================================ */
+body.mobile-mode .wrap {
+  max-width: 100%;
+  padding: 10px;
+}
+
+body.mobile-mode .title-block h1 {
+  font-size: 1.8rem;
+  margin-top: 25px;
+}
+
+body.mobile-mode .scoreboard {
+  padding: 10px;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+body.mobile-mode .p-score {
+  font-size: 1.8rem;
+}
+body.mobile-mode .player-panel .p-name {
+  font-size: 0.8rem;
+}
+
+/* Takımlar mobilde tek satırda kompakt yan yana */
+body.mobile-mode .matchup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+body.mobile-mode .club-card {
+  flex: 1;
+  padding: 10px 4px;
+}
+body.mobile-mode .club-crest {
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+body.mobile-mode .club-name {
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.mobile-mode .prompt-text {
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+/* Mobilde sadece kendi kutun öne çıksın, rakibin kutusu yer kaplamasın */
+body.mobile-mode .dual-answer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.mobile-mode .player-box:not(.is-mine) {
+  opacity: 0.4;
+  transform: scale(0.95);
+  pointer-events: none;
+  order: 2;
+}
+
+body.mobile-mode .player-box.is-mine {
+  order: 1;
+}
+
+body.mobile-mode .player-box.is-mine input {
+  font-size: 1.1rem;
+  padding: 14px;
+}
+
+/* Mobilde dokunmatik gönder butonunu görünür yap */
+body.mobile-mode .player-box.is-mine .mobile-submit-btn {
+  display: block;
+}
 }
 
 *{box-sizing:border-box;}
@@ -292,7 +409,14 @@ footer{ margin-top: 30px; text-align:center; color: var(--muted); font-size: 0.7
 </style>
 </head>
 <body>
+<body>
+  <!-- MOBİL MOD BUTONU -->
+  <button id="btn-mode-toggle" class="mode-toggle-btn" onclick="toggleMobileMode()">
+    📱 Mobil Mod
+  </button>
 
+  <div class="wrap">
+  ...
 <div class="wrap">
   <div class="title-block">
     <h1>3-2-1 ADEBAYOR!</h1>
@@ -349,15 +473,17 @@ footer{ margin-top: 30px; text-align:center; color: var(--muted); font-size: 0.7
 
     <div class="timer-track"><div class="timer-fill" id="timer-fill"></div></div>
 
-    <!-- İKİ OYUNCU İÇİN ÇİFT CEVAP KUTUSU -->
+ <!-- İKİ OYUNCU İÇİN ÇİFT CEVAP KUTUSU -->
     <div class="dual-answer-container">
       <div class="player-box p1-box">
         <label id="label-p1-box">PLAYER 1</label>
         <input type="text" id="answer-p1" placeholder="Yaz ve Enter'a bas..." autocomplete="off">
+        <button type="button" class="mobile-submit-btn" onclick="submitAnswer(document.getElementById('answer-p1').value); document.getElementById('answer-p1').value='';">GÖNDER</button>
       </div>
       <div class="player-box p2-box">
         <label id="label-p2-box">PLAYER 2</label>
         <input type="text" id="answer-p2" placeholder="Yaz ve Enter'a bas..." autocomplete="off">
+        <button type="button" class="mobile-submit-btn" onclick="submitAnswer(document.getElementById('answer-p2').value); document.getElementById('answer-p2').value='';">GÖNDER</button>
       </div>
     </div>
 
@@ -381,6 +507,23 @@ footer{ margin-top: 30px; text-align:center; color: var(--muted); font-size: 0.7
    3-2-1 ADEBAYOR! — Oyun tamamen WebSocket state'i üzerinden
    yönetilir. Yerel/tek cihaz fetch tabanlı akış kaldırıldı.
    ============================================================ */
+   /* ---------------- MOBİL MOD YÖNETİMİ ---------------- */
+function toggleMobileMode() {
+  const isMobile = document.body.classList.toggle('mobile-mode');
+  const btn = document.getElementById('btn-mode-toggle');
+  if (isMobile) {
+    btn.textContent = '💻 Masaüstü Modu';
+  } else {
+    btn.textContent = '📱 Mobil Mod';
+  }
+}
+
+// Cihaz mobilse veya ekran dar ise otomatik olarak mobil moda geçir
+if (window.innerWidth <= 768 || /Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+  document.body.classList.add('mobile-mode');
+  const btn = document.getElementById('btn-mode-toggle');
+  if (btn) btn.textContent = '💻 Masaüstü Modu';
+}
    
 
 const SERVER_HOST = "adebayor2-trivia.onrender.com";

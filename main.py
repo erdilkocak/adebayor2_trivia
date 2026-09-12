@@ -129,18 +129,19 @@ def find_common_players(clubA: dict, clubB: dict):
     return common
 
 
-def pick_valid_match() -> Optional[dict]:
-    """Ortak oyuncusu olan iki farklı kulüp seçer.
-
-    Veritabanı boşsa / yetersizse ya da MAX_MATCH_ATTEMPTS denemede
-    uygun eşleşme bulunamazsa None döner (sonsuz döngü riski yok).
-    """
+def pick_valid_match(exclude_ids: tuple = None) -> Optional[dict]:
     db = load_db()
     if len(db) < 2:
         return None
 
+    # Önce son sorulan takımlar hariç rastgele eşleşme dene
     for _ in range(MAX_MATCH_ATTEMPTS):
         clubA, clubB = random.sample(db, 2)
+        
+        # Bir önceki round ile aynı eşleşmeyse atla
+        if exclude_ids and set([clubA["club_id"], clubB["club_id"]]) == set(exclude_ids):
+            continue
+
         common = find_common_players(clubA, clubB)
         if common:
             return {
@@ -159,7 +160,7 @@ def pick_valid_match() -> Optional[dict]:
                 "common_players": list(dict.fromkeys(common)),
             }
 
-    # Son çare: tüm ikilileri tara, ilk uygun olanı döndür
+    # Bulunamazsa kısıtlamayı kaldırıp rastgele ilk bulduğunu döndür
     for i in range(len(db)):
         for j in range(len(db)):
             if i == j:
@@ -167,18 +168,8 @@ def pick_valid_match() -> Optional[dict]:
             common = find_common_players(db[i], db[j])
             if common:
                 return {
-                    "clubA": {
-                        "id": db[i]["club_id"],
-                        "name": db[i]["club_name"],
-                        "league": "All-Time",
-                        "color": "#123526",
-                    },
-                    "clubB": {
-                        "id": db[j]["club_id"],
-                        "name": db[j]["club_name"],
-                        "league": "All-Time",
-                        "color": "#1B4E36",
-                    },
+                    "clubA": {"id": db[i]["club_id"], "name": db[i]["club_name"], "league": "All-Time", "color": "#123526"},
+                    "clubB": {"id": db[j]["club_id"], "name": db[j]["club_name"], "league": "All-Time", "color": "#1B4E36"},
                     "common_players": list(dict.fromkeys(common)),
                 }
 
@@ -231,13 +222,22 @@ async def broadcast(room: dict, payload: dict):
 
 
 async def start_new_round(room_id: str, room: dict):
-    match = pick_valid_match()
+    # Bir önceki eşleşmenin ID'lerini alarak aynı eşleşmenin tekrar gelmesini engelle
+    prev_ids = None
+    if room.get("current_match"):
+        prev_ids = (
+            room["current_match"]["clubA"]["id"],
+            room["current_match"]["clubB"]["id"]
+        )
+
+    match = pick_valid_match(exclude_ids=prev_ids)
     if match is None:
         await broadcast(room, {
             "type": "ERROR",
             "msg": "Uygun eşleşme bulunamadı, lütfen veritabanını kontrol edin.",
         })
         return
+
     room["current_match"] = match
     await broadcast(room, {
         "type": "ROUND_START",

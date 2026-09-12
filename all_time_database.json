@@ -1,5 +1,4 @@
 [
-  [
   {
     "club_id": "BES",
     "club_name": "Beşiktaş",
@@ -137,8 +136,8 @@
       "Franck Kessie", "Jules Kounde", "Marcos Alonso", "Hector Bellerin", "Ilkay Gündogan", "Inigo Martinez",
       "Joao Cancelo", "Joao Felix", "Lamine Yamal", "Gavi", "Fermin Lopez", "Dani Olmo"
     ]
-  }
-],{
+  },
+{
     "club_id": "MUN",
     "club_name": "Manchester United",
     "players": [
@@ -160,7 +159,7 @@
       "Alex Telles", "Amad Diallo", "Tom Heaton", "Christian Eriksen", "Lisandro Martinez", "Tyrell Malacia",
       "Antony", "Wout Weghorst", "Marcel Sabitzer", "Mason Mount", "Andre Onana", "Rasmus Höjlund",
       "Sofyan Amrabat", "Jonny Evans", "Altay Bayındır", "Joshua Zirkzee", "Matthijs de Ligt", "Noussair Mazraoui",
-      "Manuel Ugarte", "Leny Yoro"
+      "Manuel Ugarte", "Leny Yoro","Giovani dos Santos"
     ]
   },
   {
